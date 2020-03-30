@@ -1,5 +1,5 @@
 # FotoSort-rs
-[Fotsort](https://github.com/phil0x2e/FotoSort) but using rust and [image\_window](https://github.com/phil0x2e/image_window).
+[FotSort](https://github.com/phil0x2e/FotoSort) but using rust and [image\_window](https://github.com/phil0x2e/image_window).
 
 Compile with --build flag, or it will be unsusably slow.
 
