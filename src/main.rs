@@ -7,13 +7,24 @@ use std::fs;
 use std::fs::create_dir;
 use std::path::Path;
 
-fn get_commandline_arguments() -> Vec<String> {
+struct Arguments {
+    paths: Vec<String>,
+    is_move: bool,
+}
+
+fn get_commandline_arguments() -> Arguments {
     let description = "A Tool for sorting images into different folders.\n\n\
                        Just pass the images as arguments and copy the currently displayed image into the folder 1-5, using the keys 1-5.";
     let matches = App::new("FotoSort-rs")
         .version(crate_version!())
         .author(crate_authors!())
         .about(description)
+        .arg(
+            Arg::with_name("move")
+                .long("move")
+                .short("m")
+                .help("Flag that can be set, so that files are moved instead of copied"),
+        )
         .arg(
             Arg::with_name("FILES")
                 .help("Image Files")
@@ -22,16 +33,21 @@ fn get_commandline_arguments() -> Vec<String> {
                 .index(1),
         )
         .get_matches();
+
     let files: Vec<String> = matches
         .values_of("FILES")
         .unwrap()
         .into_iter()
         .map(|s| String::from(s))
         .collect();
-    files
+
+    Arguments {
+        paths: files,
+        is_move: matches.is_present("move"),
+    }
 }
 
-fn copy_file(from: &str, to: &str) -> Result<(), std::io::Error> {
+fn copy_or_move_file(from: &str, to: &str, is_move: bool) -> Result<(), std::io::Error> {
     if !Path::new(to).is_dir() {
         create_dir(to)?;
     }
@@ -39,56 +55,95 @@ fn copy_file(from: &str, to: &str) -> Result<(), std::io::Error> {
         .file_name()
         .expect("File name ends in ..")
         .to_string_lossy();
-    fs::copy(from, format!("{}/{}", to, file_name)).unwrap();
-    println!("Copied {} to Folder {}", file_name, to);
+    if is_move {
+        fs::rename(from, format!("{}/{}", to, file_name)).unwrap();
+        println!("Moved {} to Folder {}", file_name, to);
+    } else {
+        fs::copy(from, format!("{}/{}", to, file_name)).unwrap();
+        println!("Copied {} to Folder {}", file_name, to);
+    }
     Ok(())
 }
 
-fn check_user_input(window: &mut ImageWindow, file_paths: &[String], pos: &mut usize) {
+fn check_user_input(
+    window: &mut ImageWindow,
+    file_paths: &mut Vec<String>,
+    pos: &mut usize,
+    is_move: bool,
+) -> bool {
+    let mut refresh = false;
     if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
         let dir_name = "1";
-        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
+        }
+        if is_move {
+            file_paths.remove(*pos);
+            refresh = true;
         }
     } else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
         let dir_name = "2";
-        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
+            file_paths.remove(*pos);
+        }
+        if is_move {
+            file_paths.remove(*pos);
+            refresh = true;
         }
     } else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
         let dir_name = "3";
-        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
+            file_paths.remove(*pos);
+        }
+        if is_move {
+            file_paths.remove(*pos);
+            refresh = true;
         }
     } else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
         let dir_name = "4";
-        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
+            file_paths.remove(*pos);
+        }
+        if is_move {
+            file_paths.remove(*pos);
+            refresh = true;
         }
     } else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
         let dir_name = "5";
-        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
+            file_paths.remove(*pos);
+        }
+        if is_move {
+            file_paths.remove(*pos);
+            refresh = true;
         }
     }
 
     if window.is_key_pressed(Key::Left, KeyRepeat::No) {
+        refresh = true;
         if *pos != 0 {
             *pos -= 1;
         } else {
             *pos = file_paths.len() - 1;
         }
     } else if window.is_key_pressed(Key::Right, KeyRepeat::No) {
+        refresh = true;
         if *pos != file_paths.len() - 1 {
             *pos += 1;
         } else {
             *pos = 0;
         }
     }
+    refresh
 }
 
 fn main() {
-    let mut file_paths = get_commandline_arguments();
+    let arguments = get_commandline_arguments();
+    let mut file_paths = arguments.paths;
     // Check if file exists and is an image, that can be opened
     file_paths = file_paths
         .into_iter()
@@ -114,14 +169,23 @@ fn main() {
     //let images = load_images(&file_paths);
     let mut pos: usize = 0;
     if file_paths.len() > 0 {
-        window.set_image_from_path(&file_paths[pos]).unwrap();
+        window.set_image_from_path_fit(&file_paths[pos]).unwrap();
+        println!("Image {}/{}", 1, file_paths.len());
     }
     while window.is_open() && !window.is_key_down(Key::Escape) {
         if file_paths.len() > 0 {
-            let old_pos = pos;
-            check_user_input(&mut window, &file_paths, &mut pos);
-            if old_pos != pos {
-                window.set_image_from_path(&file_paths[pos]).unwrap();
+            let refresh =
+                check_user_input(&mut window, &mut file_paths, &mut pos, arguments.is_move);
+            if refresh {
+                if file_paths.len() == 0 {
+                    println!("All images moved.");
+                    break;
+                }
+                if pos >= file_paths.len() {
+                    pos = file_paths.len() - 1;
+                }
+                println!("Image {}/{}", pos + 1, file_paths.len());
+                window.set_image_from_path_fit(&file_paths[pos]).unwrap();
             }
             window.fit_to_screen();
         }
