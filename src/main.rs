@@ -89,10 +89,12 @@ fn check_user_input(window: &mut ImageWindow, file_paths: &[String], pos: &mut u
 
 fn main() {
     let mut file_paths = get_commandline_arguments();
+    // Check if file exists and is an image, that can be opened
     file_paths = file_paths
         .into_iter()
-        .filter(|fp| Path::new(fp).exists())
+        .filter(|fp| image::open(fp).is_ok())
         .collect();
+
     let mut window = ImageWindow::new(
         "FotoSort-rs",
         800,
