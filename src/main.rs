@@ -99,10 +99,10 @@ fn main() {
         600,
         WindowOptions {
             resize: true,
-            scale_mode: ScaleMode::AspectRatioStretch,
+            scale_mode: ScaleMode::Center,
             ..WindowOptions::default()
         },
-        None,
+        Some(FilterType::CatmullRom),
     )
     .unwrap();
 
@@ -111,12 +111,17 @@ fn main() {
 
     //let images = load_images(&file_paths);
     let mut pos: usize = 0;
-    window.set_image_from_path(&file_paths[pos]).unwrap();
+    if file_paths.len() > 0 {
+        window.set_image_from_path(&file_paths[pos]).unwrap();
+    }
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        let old_pos = pos;
-        check_user_input(&mut window, &file_paths, &mut pos);
-        if old_pos != pos {
-            window.set_image_from_path(&file_paths[pos]).unwrap();
+        if file_paths.len() > 0 {
+            let old_pos = pos;
+            check_user_input(&mut window, &file_paths, &mut pos);
+            if old_pos != pos {
+                window.set_image_from_path(&file_paths[pos]).unwrap();
+            }
+            window.fit_to_screen();
         }
         window.update();
     }
