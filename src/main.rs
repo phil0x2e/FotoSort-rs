@@ -8,7 +8,8 @@ use std::fs::create_dir;
 use std::path::Path;
 
 fn get_commandline_arguments() -> Vec<String> {
-    let description = "TODO";
+    let description = "A Tool for sorting images into different folders.\n\n\
+                       Just pass the images as arguments and copy the currently displayed image into the folder 1-5, using the keys 1-5.";
     let matches = App::new("FotoSort-rs")
         .version(crate_version!())
         .author(crate_authors!())
