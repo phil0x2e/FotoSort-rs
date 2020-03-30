@@ -94,7 +94,7 @@ fn main() {
         .filter(|fp| Path::new(fp).exists())
         .collect();
     let mut window = ImageWindow::new(
-        "image_window example",
+        "FotoSort-rs",
         800,
         600,
         WindowOptions {
@@ -111,10 +111,13 @@ fn main() {
 
     //let images = load_images(&file_paths);
     let mut pos: usize = 0;
+    window.set_image_from_path(&file_paths[pos]).unwrap();
     while window.is_open() && !window.is_key_down(Key::Escape) {
+        let old_pos = pos;
         check_user_input(&mut window, &file_paths, &mut pos);
-
-        window.set_image_from_path(&file_paths[pos]).unwrap();
+        if old_pos != pos {
+            window.set_image_from_path(&file_paths[pos]).unwrap();
+        }
         window.update();
     }
     println!("\nBye.");
