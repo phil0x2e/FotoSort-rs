@@ -2,8 +2,10 @@ extern crate clap;
 extern crate image;
 extern crate image_window;
 use clap::{crate_authors, crate_version, App, Arg};
-use image::DynamicImage;
 use image_window::{FilterType, ImageWindow, Key, KeyRepeat, ScaleMode, WindowOptions};
+use std::fs;
+use std::fs::create_dir;
+use std::path::Path;
 
 fn get_commandline_arguments() -> Vec<String> {
     let description = "TODO";
@@ -28,18 +30,67 @@ fn get_commandline_arguments() -> Vec<String> {
     files
 }
 
-fn load_images(file_paths: &[String]) -> Vec<DynamicImage> {
-    let mut images = Vec::with_capacity(file_paths.len());
-    for fp in file_paths {
-        if let Ok(img) = image::open(fp) {
-            images.push(img);
+fn copy_file(from: &str, to: &str) -> Result<(), std::io::Error> {
+    if !Path::new(to).is_dir() {
+        create_dir(to)?;
+    }
+    let file_name = Path::new(from)
+        .file_name()
+        .expect("File name ends in ..")
+        .to_string_lossy();
+    fs::copy(from, format!("{}/{}", to, file_name)).unwrap();
+    println!("Copied {} to Folder {}", file_name, to);
+    Ok(())
+}
+
+fn check_user_input(window: &mut ImageWindow, file_paths: &[String], pos: &mut usize) {
+    if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
+        if let Err(_e) = copy_file(&file_paths[*pos], "1") {
+            println!("Error creating directory 1")
         }
     }
-    images
+    else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
+        if let Err(_e) = copy_file(&file_paths[*pos], "2") {
+            println!("Error creating directory 2")
+        }
+    }
+    else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
+        if let Err(_e) = copy_file(&file_paths[*pos], "3") {
+            println!("Error creating directory 3")
+        }
+    }
+    else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
+        if let Err(_e) = copy_file(&file_paths[*pos], "4") {
+            println!("Error creating directory 3")
+        }
+    }
+    else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
+        if let Err(_e) = copy_file(&file_paths[*pos], "5") {
+            println!("Error creating directory 3")
+        }
+    }
+
+    if window.is_key_pressed(Key::Left, KeyRepeat::No) {
+        if *pos != 0 {
+            *pos -= 1;
+        } else {
+            *pos = file_paths.len() - 1;
+        }
+    } else if window.is_key_pressed(Key::Right, KeyRepeat::No) {
+        if *pos != file_paths.len() - 1 {
+            *pos += 1;
+        } else {
+            *pos = 0;
+        }
+    }
 }
 
 fn main() {
-    let file_paths = get_commandline_arguments();
+    let mut file_paths = get_commandline_arguments();
+    file_paths = file_paths
+        .into_iter()
+        .filter(|fp| Path::new(fp).exists())
+        .collect();
     let mut window = ImageWindow::new(
         "image_window example",
         800,
@@ -56,24 +107,12 @@ fn main() {
     // Limit to max ~60 fps update rate
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
-    let images = load_images(&file_paths);
+    //let images = load_images(&file_paths);
     let mut pos: usize = 0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
-        if window.is_key_pressed(Key::Left, KeyRepeat::No) {
-            if pos != 0 {
-                pos -= 1;
-            } else {
-                pos = images.len() - 1;
-            }
-        } else if window.is_key_pressed(Key::Right, KeyRepeat::No) {
-            if pos != images.len() - 1 {
-                pos += 1;
-            } else {
-                pos = 0;
-            }
-        }
+        check_user_input(&mut window, &file_paths, &mut pos);
 
-        window.set_from_image(&images[pos]);
+        window.set_image_from_path(&file_paths[pos]).unwrap();
         window.update();
     }
 }
