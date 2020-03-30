@@ -49,26 +49,22 @@ fn check_user_input(window: &mut ImageWindow, file_paths: &[String], pos: &mut u
         if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
             println!("Error creating directory {}", dir_name);
         }
-    }
-    else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
+    } else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
         let dir_name = "2";
         if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
             println!("Error creating directory {}", dir_name);
         }
-    }
-    else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
+    } else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
         let dir_name = "3";
         if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
             println!("Error creating directory {}", dir_name);
         }
-    }
-    else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
+    } else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
         let dir_name = "4";
         if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
             println!("Error creating directory {}", dir_name);
         }
-    }
-    else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
+    } else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
         let dir_name = "5";
         if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
             println!("Error creating directory {}", dir_name);
