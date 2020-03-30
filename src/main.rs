@@ -45,28 +45,33 @@ fn copy_file(from: &str, to: &str) -> Result<(), std::io::Error> {
 
 fn check_user_input(window: &mut ImageWindow, file_paths: &[String], pos: &mut usize) {
     if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
-        if let Err(_e) = copy_file(&file_paths[*pos], "1") {
-            println!("Error creating directory 1")
+        let dir_name = "1";
+        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+            println!("Error creating directory {}", dir_name);
         }
     }
     else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
-        if let Err(_e) = copy_file(&file_paths[*pos], "2") {
-            println!("Error creating directory 2")
+        let dir_name = "2";
+        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+            println!("Error creating directory {}", dir_name);
         }
     }
     else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
-        if let Err(_e) = copy_file(&file_paths[*pos], "3") {
-            println!("Error creating directory 3")
+        let dir_name = "3";
+        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+            println!("Error creating directory {}", dir_name);
         }
     }
-    else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
-        if let Err(_e) = copy_file(&file_paths[*pos], "4") {
-            println!("Error creating directory 3")
+    else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
+        let dir_name = "4";
+        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+            println!("Error creating directory {}", dir_name);
         }
     }
-    else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
-        if let Err(_e) = copy_file(&file_paths[*pos], "5") {
-            println!("Error creating directory 3")
+    else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
+        let dir_name = "5";
+        if let Err(_e) = copy_file(&file_paths[*pos], dir_name) {
+            println!("Error creating directory {}", dir_name);
         }
     }
 
@@ -115,4 +120,5 @@ fn main() {
         window.set_image_from_path(&file_paths[pos]).unwrap();
         window.update();
     }
+    println!("\nBye.");
 }
