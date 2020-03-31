@@ -1,0 +1,12 @@
+[package]
+name = "foto_sort"
+version = "0.2.0"
+authors = ["phil <ph-ketteni@t-online.de>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+image = "0.23"
+clap = "2.33"
+image_window = { git = "https://github.com/phil0x2e/image_window" }

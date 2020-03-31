@@ -14,7 +14,11 @@ struct Arguments {
 
 fn get_commandline_arguments() -> Arguments {
     let description = "A Tool for sorting images into different folders.\n\n\
-                       Just pass the images as arguments and copy the currently displayed image into the folder 1-5, using the keys 1-5.";
+                       Just pass the images as arguments and copy the currently displayed image into the folder fs1-fs5, using the keys 1-5.\n\
+                       To rotate the preview by 90° press R, the image file is not rotated.\n\
+                       You can delte a file by pressing Del and then Y\n\
+                       To move a file you can hold down M while entering a number for a folder or if you want to move all files just start with -m.\n\
+                       To Copy a file in -m mode hold down C while entering a number";
     let matches = App::new("FotoSort-rs")
         .version(crate_version!())
         .author(crate_authors!())
@@ -73,7 +77,7 @@ fn check_user_input(
 ) -> bool {
     let mut refresh = false;
     if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
-        let dir_name = "1";
+        let dir_name = "fs1";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
         }
@@ -82,7 +86,7 @@ fn check_user_input(
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
-        let dir_name = "2";
+        let dir_name = "fs2";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
             file_paths.remove(*pos);
@@ -92,7 +96,7 @@ fn check_user_input(
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
-        let dir_name = "3";
+        let dir_name = "fs3";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
             file_paths.remove(*pos);
@@ -102,7 +106,7 @@ fn check_user_input(
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
-        let dir_name = "4";
+        let dir_name = "fs4";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
             file_paths.remove(*pos);
@@ -112,7 +116,7 @@ fn check_user_input(
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
-        let dir_name = "5";
+        let dir_name = "fs5";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
             file_paths.remove(*pos);
@@ -120,6 +124,32 @@ fn check_user_input(
         if is_move {
             file_paths.remove(*pos);
             refresh = true;
+        }
+    }
+
+    if window.is_key_pressed(Key::R, KeyRepeat::No) {
+        window.rotate90();
+    }
+
+    if window.is_key_pressed(Key::Delete, KeyRepeat::No) {
+        println!(
+            "Are you sure you want to delete {}? Yes: Y; No: N",
+            &file_paths[*pos]
+        );
+        while window.is_open() {
+            if window.is_key_pressed(Key::Y, KeyRepeat::No) {
+                println!("Deleting {}", &file_paths[*pos]);
+                fs::remove_file(&file_paths[*pos]).ok();
+                file_paths.remove(*pos);
+                refresh = true;
+                break;
+            }
+            if window.is_key_pressed(Key::N, KeyRepeat::No) {
+                println!("Aborted deletion");
+                break;
+            }
+            window.fit_to_screen();
+            window.update();
         }
     }
 
@@ -173,9 +203,15 @@ fn main() {
         println!("Image {}/{}", 1, file_paths.len());
     }
     while window.is_open() && !window.is_key_down(Key::Escape) {
+        let mut is_move = arguments.is_move;
         if file_paths.len() > 0 {
-            let refresh =
-                check_user_input(&mut window, &mut file_paths, &mut pos, arguments.is_move);
+            if window.is_key_down(Key::M) {
+                is_move = true;
+            }
+            if window.is_key_down(Key::C) {
+                is_move = false;
+            }
+            let refresh = check_user_input(&mut window, &mut file_paths, &mut pos, is_move);
             if refresh {
                 if file_paths.len() == 0 {
                     println!("All images moved.");
