@@ -27,11 +27,11 @@ fn get_commandline_arguments() -> Arguments {
             Arg::with_name("move")
                 .long("move")
                 .short("m")
-                .help("Flag that can be set, so that files are moved instead of copied"),
+                .help("If set files are moved by default instead of copied"),
         )
         .arg(
             Arg::with_name("FILES")
-                .help("Image Files")
+                .help("Paths to images")
                 .required(true)
                 .min_values(1)
                 .index(1),
