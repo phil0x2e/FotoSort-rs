@@ -69,6 +69,7 @@ fn copy_or_move_file(from: &str, to: &str, is_move: bool) -> Result<(), std::io:
     Ok(())
 }
 
+// is_move may be different from config.is_move!!
 fn check_user_input(
     window: &mut ImageWindow,
     config: &mut Config,
