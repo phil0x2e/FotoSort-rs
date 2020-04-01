@@ -72,58 +72,58 @@ fn copy_or_move_file(from: &str, to: &str, is_move: bool) -> Result<(), std::io:
 // is_move may be different from config.is_move!!
 fn check_user_input(
     window: &mut ImageWindow,
-    config: &mut Config,
+    file_paths: &mut Vec<String>,
     pos: &mut usize,
     is_move: bool,
 ) -> bool {
     let mut refresh = false;
     if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
         let dir_name = "fs1";
-        if let Err(_e) = copy_or_move_file(&config.file_paths[*pos], dir_name, is_move) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
         }
         if is_move {
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
         let dir_name = "fs2";
-        if let Err(_e) = copy_or_move_file(&config.file_paths[*pos], dir_name, is_move) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
         }
         if is_move {
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
         let dir_name = "fs3";
-        if let Err(_e) = copy_or_move_file(&config.file_paths[*pos], dir_name, is_move) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
         }
         if is_move {
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
         let dir_name = "fs4";
-        if let Err(_e) = copy_or_move_file(&config.file_paths[*pos], dir_name, is_move) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
         }
         if is_move {
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
             refresh = true;
         }
     } else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
         let dir_name = "fs5";
-        if let Err(_e) = copy_or_move_file(&config.file_paths[*pos], dir_name, is_move) {
+        if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
             println!("Error creating directory {}", dir_name);
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
         }
         if is_move {
-            config.file_paths.remove(*pos);
+            file_paths.remove(*pos);
             refresh = true;
         }
     }
@@ -135,13 +135,13 @@ fn check_user_input(
     if window.is_key_pressed(Key::Delete, KeyRepeat::No) {
         println!(
             "Are you sure you want to delete {}? Yes: Y; No: N",
-            &config.file_paths[*pos]
+            &file_paths[*pos]
         );
         while window.is_open() {
             if window.is_key_pressed(Key::Y, KeyRepeat::No) {
-                println!("Deleting {}", &config.file_paths[*pos]);
-                fs::remove_file(&config.file_paths[*pos]).ok();
-                config.file_paths.remove(*pos);
+                println!("Deleting {}", &file_paths[*pos]);
+                fs::remove_file(&file_paths[*pos]).ok();
+                file_paths.remove(*pos);
                 refresh = true;
                 break;
             }
@@ -159,11 +159,11 @@ fn check_user_input(
         if *pos != 0 {
             *pos -= 1;
         } else {
-            *pos = config.file_paths.len() - 1;
+            *pos = file_paths.len() - 1;
         }
     } else if window.is_key_pressed(Key::Right, KeyRepeat::No) {
         refresh = true;
-        if *pos != config.file_paths.len() - 1 {
+        if *pos != file_paths.len() - 1 {
             *pos += 1;
         } else {
             *pos = 0;
@@ -172,7 +172,7 @@ fn check_user_input(
     refresh
 }
 
-fn window_loop(mut window: &mut ImageWindow, mut config: &mut Config) {
+fn window_loop(mut window: &mut ImageWindow, config: &mut Config) {
     let mut pos: usize = 0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let mut is_move = config.is_move;
@@ -183,7 +183,7 @@ fn window_loop(mut window: &mut ImageWindow, mut config: &mut Config) {
             if window.is_key_down(Key::C) {
                 is_move = false;
             }
-            let refresh = check_user_input(&mut window, &mut config, &mut pos, is_move);
+            let refresh = check_user_input(&mut window, &mut config.file_paths, &mut pos, is_move);
             if refresh {
                 if config.file_paths.len() == 0 {
                     println!("All images moved.");
