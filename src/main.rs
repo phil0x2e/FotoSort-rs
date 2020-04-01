@@ -172,7 +172,7 @@ fn check_user_input(
     refresh
 }
 
-fn window_loop(mut window: &mut ImageWindow, config: &mut Config) {
+fn window_loop(mut window: &mut ImageWindow, config: &mut Config) -> Result<(), &'static str> {
     let mut pos: usize = 0;
     while window.is_open() && !window.is_key_down(Key::Escape) {
         let mut is_move = config.is_move;
@@ -201,6 +201,7 @@ fn window_loop(mut window: &mut ImageWindow, config: &mut Config) {
         }
         window.update();
     }
+    Ok(())
 }
 
 fn main() {
@@ -238,6 +239,9 @@ fn main() {
         println!("Image {}/{}", 1, config.file_paths.len());
     }
 
-    window_loop(&mut window, &mut config);
-    println!("\nBye.");
+    if let Err(e) = window_loop(&mut window, &mut config) {
+        println!("Error: {}", e);
+    } else {
+        println!("\nBye.");
+    }
 }
