@@ -7,22 +7,26 @@ use std::fs;
 use std::fs::create_dir;
 use std::path::Path;
 
+static USAGE: &str = "Left/Right: Previous/Next Window\n\
+1..5: Copy (default) or move (when -m is set) current image to folder 1fs..5fs\n\
+C+1..5: Copy current image to folder fs[1..5]\n\
+M+1..5: Move current image to folder fs[1..5]\n\
+R: Rotate preview (the image file is not rotated)\n\
+Del: Delete current image (confirm with Y)\n\
+H: Display this usage information\n\
+Esc: Quit";
+
 struct Config {
     file_paths: Vec<String>,
     is_move: bool,
 }
 
 fn get_commandline_arguments() -> Config {
-    let description = "A Tool for sorting images into different folders.\n\n\
-                       Just pass the images as arguments and copy the currently displayed image into the folder fs1-fs5, using the keys 1-5.\n\
-                       To rotate the preview by 90° press R, the image file is not rotated.\n\
-                       You can delte a file by pressing Del and then Y\n\
-                       To move a file you can hold down M while entering a number for a folder or if you want to move all files just start with -m.\n\
-                       To Copy a file in -m mode hold down C while entering a number";
+    let description = format!("A simple command line tool for reviewing images and sorting them into different folders.\n\nUsage:\n{}", USAGE);
     let matches = App::new("FotoSort-rs")
         .version(crate_version!())
         .author(crate_authors!())
-        .about(description)
+        .about(description.as_str())
         .arg(
             Arg::with_name("move")
                 .long("move")
@@ -131,6 +135,9 @@ fn check_user_input(
     if window.is_key_pressed(Key::R, KeyRepeat::No) {
         window.rotate90();
     }
+    if window.is_key_pressed(Key::H, KeyRepeat::No) {
+        println!("===========\nUsage:\n{}\n==========", USAGE);
+    }
 
     if window.is_key_pressed(Key::Delete, KeyRepeat::No) {
         println!(
@@ -232,13 +239,14 @@ fn main() {
     // Limit to max ~60 fps update rate
     window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
 
+    println!("Usage:\n{}\n==========", USAGE);
+
     if config.file_paths.len() > 0 {
         window
             .set_image_from_path_fit(&config.file_paths[0])
             .unwrap();
         println!("Image {}/{}", 1, config.file_paths.len());
     }
-
     if let Err(e) = window_loop(&mut window, &mut config) {
         println!("Error: {}", e);
     } else {
