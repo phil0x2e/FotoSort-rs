@@ -3,8 +3,11 @@ A simple command line tool for reviewing images and sorting them into different 
 
 [FotSort](https://github.com/phil0x2e/FotoSort) but using rust and [image\_window](https://github.com/phil0x2e/image_window).
 
-Compile with --build flag, or it will be unsusably slow.
-Or simply install with `cargo install --path .`
+Install with `cargo install --path .`
+
+After that you can, if *.cargo/bin* is in your PATH just call it with `fotosort ..`
+
+If you don't want to install it you have compile it with --build flag, or it will be unsusably slow.
 
 For help run `fotosort --help`.
 
