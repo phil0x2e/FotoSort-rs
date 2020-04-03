@@ -8,13 +8,13 @@ use std::fs::create_dir;
 use std::path::Path;
 
 static USAGE: &str = "Left/Right: Previous/Next Window\n\
-1..5: Copy (default) or move (when -m is set) current image to folder 1fs..5fs\n\
-C+1..5: Copy current image to folder fs[1..5]\n\
-M+1..5: Move current image to folder fs[1..5]\n\
-R: Rotate preview (the image file is not rotated)\n\
-Del: Delete current image (confirm with Y)\n\
-H: Display this usage information\n\
-Esc: Quit";
+    1..5: Copy (default) or move (when -m is set) current image to folder 1fs..5fs\n\
+    C+1..5: Copy current image to folder fs[1..5]\n\
+    M+1..5: Move current image to folder fs[1..5]\n\
+    R / Shift+R: Rotate preview 90° clockwise / counter clockwise (rotation is not saved)\n\
+    Del: Delete current image (confirm with Y)\n\
+    H: Display this usage information\n\
+    Esc: Quit";
 
 struct Config {
     file_paths: Vec<String>,
@@ -133,7 +133,11 @@ fn check_user_input(
     }
 
     if window.is_key_pressed(Key::R, KeyRepeat::No) {
-        window.rotate90();
+        if window.is_key_down(Key::LeftShift){
+            window.rotate270();
+        }else {
+            window.rotate90();
+        }
     }
     if window.is_key_pressed(Key::H, KeyRepeat::No) {
         println!("===========\nUsage:\n{}\n==========", USAGE);
