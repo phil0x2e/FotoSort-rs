@@ -2,10 +2,12 @@ extern crate clap;
 extern crate image;
 extern crate image_window;
 use clap::{crate_authors, crate_version, App, Arg};
-use image_window::{FilterType, ImageWindow, Key, KeyRepeat, ScaleMode, WindowOptions};
+use image_window::{FilterType, ImageWindow, Key, KeyRepeat, MouseMode, ScaleMode, WindowOptions};
 use std::fs;
 use std::fs::create_dir;
+use std::io::{self, Write};
 use std::path::Path;
+use terminal_size::{terminal_size, Height, Width};
 
 static USAGE: &str = "Left/Right: Previous/Next Window\n\
     1..5: Copy (default) or move (when -m is set) current image to folder 1fs..5fs\n\
@@ -14,6 +16,7 @@ static USAGE: &str = "Left/Right: Previous/Next Window\n\
     R / Shift+R: Rotate preview 90° clockwise / counter clockwise (rotation is not saved)\n\
     Del: Delete current image (confirm with Y)\n\
     H: Display this usage information\n\
+    F5: reload current image\n\
     Esc: Quit";
 
 struct Config {
@@ -65,10 +68,10 @@ fn copy_or_move_file(from: &str, to: &str, is_move: bool) -> Result<(), std::io:
         .to_string_lossy();
     if is_move {
         fs::rename(from, format!("{}/{}", to, file_name)).unwrap();
-        println!("Moved {} to Folder {}", file_name, to);
+        println!("\nMoved {} to Folder {}", file_name, to);
     } else {
         fs::copy(from, format!("{}/{}", to, file_name)).unwrap();
-        println!("Copied {} to Folder {}", file_name, to);
+        println!("\nCopied {} to Folder {}", file_name, to);
     }
     Ok(())
 }
@@ -84,7 +87,7 @@ fn check_user_input(
     if window.is_key_pressed(Key::Key1, KeyRepeat::No) {
         let dir_name = "fs1";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
-            println!("Error creating directory {}", dir_name);
+            println!("\nError creating directory {}", dir_name);
         }
         if is_move {
             file_paths.remove(*pos);
@@ -93,7 +96,7 @@ fn check_user_input(
     } else if window.is_key_pressed(Key::Key2, KeyRepeat::No) {
         let dir_name = "fs2";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
-            println!("Error creating directory {}", dir_name);
+            println!("\nError creating directory {}", dir_name);
             file_paths.remove(*pos);
         }
         if is_move {
@@ -103,7 +106,7 @@ fn check_user_input(
     } else if window.is_key_pressed(Key::Key3, KeyRepeat::No) {
         let dir_name = "fs3";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
-            println!("Error creating directory {}", dir_name);
+            println!("\nError creating directory {}", dir_name);
             file_paths.remove(*pos);
         }
         if is_move {
@@ -113,7 +116,7 @@ fn check_user_input(
     } else if window.is_key_pressed(Key::Key4, KeyRepeat::No) {
         let dir_name = "fs4";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
-            println!("Error creating directory {}", dir_name);
+            println!("\nError creating directory {}", dir_name);
             file_paths.remove(*pos);
         }
         if is_move {
@@ -123,7 +126,7 @@ fn check_user_input(
     } else if window.is_key_pressed(Key::Key5, KeyRepeat::No) {
         let dir_name = "fs5";
         if let Err(_e) = copy_or_move_file(&file_paths[*pos], dir_name, is_move) {
-            println!("Error creating directory {}", dir_name);
+            println!("\nError creating directory {}", dir_name);
             file_paths.remove(*pos);
         }
         if is_move {
@@ -133,19 +136,23 @@ fn check_user_input(
     }
 
     if window.is_key_pressed(Key::R, KeyRepeat::No) {
-        if window.is_key_down(Key::LeftShift){
+        if window.is_key_down(Key::LeftShift) {
             window.rotate270();
-        }else {
+        } else {
             window.rotate90();
         }
     }
     if window.is_key_pressed(Key::H, KeyRepeat::No) {
-        println!("===========\nUsage:\n{}\n==========", USAGE);
+        println!("\n===========\nUsage:\n{}\n==========", USAGE);
+    }
+
+    if window.is_key_pressed(Key::F5, KeyRepeat::No) {
+        refresh = true;
     }
 
     if window.is_key_pressed(Key::Delete, KeyRepeat::No) {
         println!(
-            "Are you sure you want to delete {}? Yes: Y; No: N",
+            "\nAre you sure you want to delete {}? Yes: Y; No: N",
             &file_paths[*pos]
         );
         while window.is_open() {
@@ -164,6 +171,13 @@ fn check_user_input(
             window.update();
         }
     }
+
+    window.get_scroll_wheel().map(|scroll| {
+        let scrl = scroll.1;
+        window.get_mouse_pos(MouseMode::Clamp).map(|mouse| {
+            println!("x {} y {}", mouse.0, mouse.1);
+        });
+    });
 
     if window.is_key_pressed(Key::Left, KeyRepeat::No) {
         refresh = true;
@@ -197,13 +211,20 @@ fn window_loop(mut window: &mut ImageWindow, config: &mut Config) -> Result<(), 
             let refresh = check_user_input(&mut window, &mut config.file_paths, &mut pos, is_move);
             if refresh {
                 if config.file_paths.len() == 0 {
-                    println!("All images moved.");
+                    println!("\nAll images moved.");
                     break;
                 }
                 if pos >= config.file_paths.len() {
                     pos = config.file_paths.len() - 1;
                 }
-                println!("Image {}/{}", pos + 1, config.file_paths.len());
+                clear_line();
+                print!(
+                    "\rImage {}/{} ({})",
+                    pos + 1,
+                    config.file_paths.len(),
+                    config.file_paths[pos]
+                );
+                io::stdout().flush().unwrap();
                 window
                     .set_image_from_path_fit(&config.file_paths[pos])
                     .unwrap();
@@ -213,6 +234,13 @@ fn window_loop(mut window: &mut ImageWindow, config: &mut Config) -> Result<(), 
         window.update();
     }
     Ok(())
+}
+
+fn clear_line() {
+    if let Some((Width(w), Height(_h))) = terminal_size() {
+        let whitespaces = std::iter::repeat(" ").take(w as usize).collect::<String>();
+        print!("\r{}", whitespaces)
+    }
 }
 
 fn main() {
@@ -249,10 +277,16 @@ fn main() {
         window
             .set_image_from_path_fit(&config.file_paths[0])
             .unwrap();
-        println!("Image {}/{}", 1, config.file_paths.len());
+        print!(
+            "Image {}/{} ({})",
+            1,
+            config.file_paths.len(),
+            config.file_paths[0]
+        );
+        io::stdout().flush().unwrap();
     }
     if let Err(e) = window_loop(&mut window, &mut config) {
-        println!("Error: {}", e);
+        println!("\nError: {}", e);
     } else {
         println!("\nBye.");
     }
