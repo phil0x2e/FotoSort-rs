@@ -13,11 +13,13 @@ For help run `fotosort --help`.
 
 ## Usage
 - Left/Right: Previous/Next Window
-- 1..5: Copy (default) or move (when -m is set) current image to folder 1fs..5fs
+- 1..5: Copy (default) or move (when -m is set) current image to folder fs[1..5]
 - C+1..5: Copy current image to folder fs[1..5]
 - M+1..5: Move current image to folder fs[1..5]
-- R: Rotate preview (the image file is not rotated)
+- R / Shift+R: Rotate preview 90° clockwise / counter clockwise (rotation is not saved)
 - Del: Delete current image (confirm with Y)
+- H: Display this usage information
+- F5: reload current image
 - Esc: Quit
 
 ## TODO

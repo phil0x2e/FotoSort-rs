@@ -10,7 +10,7 @@ use std::path::Path;
 use terminal_size::{terminal_size, Height, Width};
 
 static USAGE: &str = "Left/Right: Previous/Next Window\n\
-    1..5: Copy (default) or move (when -m is set) current image to folder 1fs..5fs\n\
+    1..5: Copy (default) or move (when -m is set) current image to folder fs[1..5]\n\
     C+1..5: Copy current image to folder fs[1..5]\n\
     M+1..5: Move current image to folder fs[1..5]\n\
     R / Shift+R: Rotate preview 90° clockwise / counter clockwise (rotation is not saved)\n\
