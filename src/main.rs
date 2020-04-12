@@ -172,13 +172,6 @@ fn check_user_input(
         }
     }
 
-    window.get_scroll_wheel().map(|scroll| {
-        let scrl = scroll.1;
-        window.get_mouse_pos(MouseMode::Clamp).map(|mouse| {
-            println!("x {} y {}", mouse.0, mouse.1);
-        });
-    });
-
     if window.is_key_pressed(Key::Left, KeyRepeat::No) {
         refresh = true;
         if *pos != 0 {
