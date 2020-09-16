@@ -1,3 +1,5 @@
+![Release version](https://img.shields.io/github/v/release/phil0x2e/FotoSort-rs)
+
 # FotoSort-rs
 A simple command line tool for reviewing images and sorting them into different folders.
 
@@ -25,4 +27,3 @@ For help run `fotosort --help`.
 ## TODO
 - Named directories instead of numbers
 - Not only accept files as arguments, but also directories.
-
